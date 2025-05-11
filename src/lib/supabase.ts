@@ -1,12 +1,17 @@
 
 import { createClient } from "@supabase/supabase-js";
 
-// Отримуємо URL та API ключ із змінних середовища
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL as string;
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY as string;
+// Get URL and API key from environment variables, or use empty strings as fallback
+// This allows the app to at least initialize without crashing when env vars aren't set
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || "";
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || "";
 
-// Створюємо клієнт Supabase
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+let supabase: ReturnType<typeof createClient> | null = null;
+
+// Only create the client if we have valid URL and key
+if (supabaseUrl && supabaseAnonKey) {
+  supabase = createClient(supabaseUrl, supabaseAnonKey);
+}
 
 // Типи даних для роботи з базою
 export interface VegetablePriceRecord {
@@ -22,6 +27,11 @@ export interface VegetablePriceRecord {
 // Функція для отримання актуальних цін з Supabase
 export async function getVegetablePrices() {
   try {
+    if (!supabase) {
+      console.warn("Supabase client not initialized - missing environment variables");
+      return null;
+    }
+    
     const { data, error } = await supabase
       .from('vegetable_prices')
       .select('*')
@@ -42,6 +52,11 @@ export async function getVegetablePrices() {
 // Функція для отримання часу останнього оновлення
 export async function getLastUpdated() {
   try {
+    if (!supabase) {
+      console.warn("Supabase client not initialized - missing environment variables");
+      return null;
+    }
+    
     const { data, error } = await supabase
       .from('update_info')
       .select('last_updated')

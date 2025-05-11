@@ -21,6 +21,7 @@ const PriceTable: React.FC = () => {
   } = useQuery({
     queryKey: ['vegetable-prices'],
     queryFn: getVegetablePrices,
+    retry: 1, // Limit retries to reduce console errors
   });
   
   // Запит часу останнього оновлення
@@ -31,6 +32,7 @@ const PriceTable: React.FC = () => {
   } = useQuery({
     queryKey: ['last-update'],
     queryFn: getLastUpdated,
+    retry: 1, // Limit retries to reduce console errors
   });
 
   // Показуємо локальні дані, якщо не вдалося отримати дані з Supabase
@@ -44,6 +46,19 @@ const PriceTable: React.FC = () => {
       });
     }
   }, [isVeggiesError, isUpdateError, toast]);
+
+  // Always show offline toast when first loading in development without Supabase credentials
+  useEffect(() => {
+    const missingEnvVars = !(import.meta.env.VITE_SUPABASE_URL && import.meta.env.VITE_SUPABASE_ANON_KEY);
+    if (missingEnvVars && !isOffline) {
+      setIsOffline(true);
+      toast({
+        title: "Supabase не налаштовано",
+        description: "Відсутні змінні середовища. Показуємо тестові дані.",
+        variant: "destructive",
+      });
+    }
+  }, [toast, isOffline]);
 
   // Використовуємо онлайн дані або локальні дані за потреби
   const displayVeggies = (!isOffline && veggies && veggies.length > 0) 
