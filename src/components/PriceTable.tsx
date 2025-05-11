@@ -7,6 +7,7 @@ import { vegetables, lastUpdated } from '../data/prices';
 import { getVegetablePrices, getLastUpdated, VegetablePriceRecord } from '../lib/supabase';
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
 const PriceTable: React.FC = () => {
   const { toast } = useToast();
@@ -69,28 +70,28 @@ const PriceTable: React.FC = () => {
           <Skeleton className="h-4 w-48" />
         </div>
         <div className="overflow-x-auto">
-          <table className="min-w-full bg-white rounded-lg overflow-hidden shadow-lg">
-            <thead className="bg-ukrainian-green text-white">
-              <tr>
+          <Table>
+            <TableHeader className="bg-ukrainian-green text-white">
+              <TableRow>
                 {Array(4).fill(0).map((_, i) => (
-                  <th key={i} className="py-3 px-4">
+                  <TableHead key={i} className="py-3 px-4">
                     <Skeleton className="h-6 w-full" />
-                  </th>
+                  </TableHead>
                 ))}
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-200">
+              </TableRow>
+            </TableHeader>
+            <TableBody>
               {Array(10).fill(0).map((_, i) => (
-                <tr key={i}>
+                <TableRow key={i}>
                   {Array(4).fill(0).map((_, j) => (
-                    <td key={j} className="py-3 px-4">
+                    <TableCell key={j} className="py-3 px-4">
                       <Skeleton className="h-4 w-full" />
-                    </td>
+                    </TableCell>
                   ))}
-                </tr>
+                </TableRow>
               ))}
-            </tbody>
-          </table>
+            </TableBody>
+          </Table>
         </div>
       </div>
     );
@@ -111,54 +112,54 @@ const PriceTable: React.FC = () => {
       </div>
       
       <div className="overflow-x-auto">
-        <table className="min-w-full bg-white rounded-lg overflow-hidden shadow-lg">
-          <thead className="bg-ukrainian-green text-white">
-            <tr>
-              <th className="py-3 px-4 text-left">Овоч</th>
-              <th className="py-3 px-4 text-center">
+        <Table className="min-w-full bg-white rounded-lg overflow-hidden shadow-lg">
+          <TableHeader className="bg-ukrainian-green text-white">
+            <TableRow>
+              <TableHead className="py-3 px-4 text-left text-white">Овоч</TableHead>
+              <TableHead className="py-3 px-4 text-center text-white">
                 <div className="flex items-center justify-center">
                   <span className="mr-2">МЕТРО</span>
                   <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/2/27/Metro_logo.svg/150px-Metro_logo.svg.png" 
                     alt="Metro" className="h-6 hidden sm:inline-block" />
                 </div>
-              </th>
-              <th className="py-3 px-4 text-center">
+              </TableHead>
+              <TableHead className="py-3 px-4 text-center text-white">
                 <div className="flex items-center justify-center">
                   <span className="mr-2">Сільпо</span>
                   <img src="https://upload.wikimedia.org/wikipedia/commons/9/99/Silpo_2022.png" 
                     alt="Silpo" className="h-6 hidden sm:inline-block" />
                 </div>
-              </th>
-              <th className="py-3 px-4 text-center">
+              </TableHead>
+              <TableHead className="py-3 px-4 text-center text-white">
                 <div className="flex items-center justify-center">
                   <span className="mr-2">АТБ</span>
                   <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c3/ATB_market_2017_logo.svg/150px-ATB_market_2017_logo.svg.png" 
                     alt="ATB" className="h-6 hidden sm:inline-block" />
                 </div>
-              </th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-gray-200">
+              </TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody className="divide-y divide-gray-200">
             {displayVeggies.map((veggie) => {
               const lowestPrice = getLowestPrice(veggie.metro, veggie.silpo, veggie.atb);
               
               return (
-                <tr key={veggie.id} className="hover:bg-gray-50">
-                  <td className="py-3 px-4 font-medium">{veggie.name}</td>
-                  <td className={`py-3 px-4 text-center ${veggie.metro === lowestPrice ? "text-ukrainian-green font-bold" : ""}`}>
+                <TableRow key={veggie.id} className="hover:bg-gray-50">
+                  <TableCell className="py-3 px-4 font-medium">{veggie.name}</TableCell>
+                  <TableCell className={`py-3 px-4 text-center ${veggie.metro === lowestPrice ? "text-ukrainian-green font-bold" : ""}`}>
                     {veggie.metro.toFixed(2)} грн/{veggie.unit}
-                  </td>
-                  <td className={`py-3 px-4 text-center ${veggie.silpo === lowestPrice ? "text-ukrainian-green font-bold" : ""}`}>
+                  </TableCell>
+                  <TableCell className={`py-3 px-4 text-center ${veggie.silpo === lowestPrice ? "text-ukrainian-green font-bold" : ""}`}>
                     {veggie.silpo.toFixed(2)} грн/{veggie.unit}
-                  </td>
-                  <td className={`py-3 px-4 text-center ${veggie.atb === lowestPrice ? "text-ukrainian-green font-bold" : ""}`}>
+                  </TableCell>
+                  <TableCell className={`py-3 px-4 text-center ${veggie.atb === lowestPrice ? "text-ukrainian-green font-bold" : ""}`}>
                     {veggie.atb.toFixed(2)} грн/{veggie.unit}
-                  </td>
-                </tr>
+                  </TableCell>
+                </TableRow>
               );
             })}
-          </tbody>
-        </table>
+          </TableBody>
+        </Table>
       </div>
 
       <div className="mt-6 bg-yellow-50 border border-ukrainian-yellow p-4 rounded-md">
