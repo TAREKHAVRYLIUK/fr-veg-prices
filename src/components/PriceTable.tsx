@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { format } from 'date-fns';
 import { uk } from 'date-fns/locale';
@@ -66,7 +65,7 @@ const PriceTable: React.FC = () => {
     : vegetables;
   
   const displayLastUpdated = (!isOffline && lastUpdateTime) 
-    ? lastUpdateTime 
+    ? lastUpdateTime as string
     : lastUpdated;
   
   const formattedDate = format(new Date(displayLastUpdated), "d MMMM yyyy, HH:mm", { locale: uk });
