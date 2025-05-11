@@ -3,8 +3,8 @@ import { createClient } from "@supabase/supabase-js";
 
 // Get URL and API key from environment variables, or use empty strings as fallback
 // This allows the app to at least initialize without crashing when env vars aren't set
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || "";
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || "";
+const supabaseUrl = import.meta.env.ceefekmopbdesqpolljh.supabase.co || "";
+const supabaseAnonKey = import.meta.env.eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNlZWZla21vcGJkZXNxcG9sbGpoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDY5NzIwMzksImV4cCI6MjA2MjU0ODAzOX0.vMwtt_3W0lotvGCV1jKh5S-Vq8T7crIk48ei2Vdv5bs || "";
 
 let supabase: ReturnType<typeof createClient> | null = null;
 
