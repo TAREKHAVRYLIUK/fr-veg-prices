@@ -1,17 +1,100 @@
 
-import React from 'react';
-import { vegetables, lastUpdated } from '../data/prices';
+import React, { useEffect, useState } from 'react';
 import { format } from 'date-fns';
 import { uk } from 'date-fns/locale';
+import { useQuery } from '@tanstack/react-query';
+import { vegetables, lastUpdated } from '../data/prices';
+import { getVegetablePrices, getLastUpdated, VegetablePriceRecord } from '../lib/supabase';
+import { Skeleton } from "@/components/ui/skeleton";
+import { useToast } from "@/hooks/use-toast";
 
 const PriceTable: React.FC = () => {
-  const formattedDate = format(new Date(lastUpdated), "d MMMM yyyy, HH:mm", { locale: uk });
+  const { toast } = useToast();
+  const [isOffline, setIsOffline] = useState(false);
+  
+  // Запит даних з Supabase
+  const { 
+    data: veggies, 
+    isLoading: isLoadingVeggies,
+    isError: isVeggiesError 
+  } = useQuery({
+    queryKey: ['vegetable-prices'],
+    queryFn: getVegetablePrices,
+  });
+  
+  // Запит часу останнього оновлення
+  const { 
+    data: lastUpdateTime, 
+    isLoading: isLoadingUpdate,
+    isError: isUpdateError 
+  } = useQuery({
+    queryKey: ['last-update'],
+    queryFn: getLastUpdated,
+  });
+
+  // Показуємо локальні дані, якщо не вдалося отримати дані з Supabase
+  useEffect(() => {
+    if (isVeggiesError || isUpdateError) {
+      setIsOffline(true);
+      toast({
+        title: "Неможливо отримати актуальні ціни",
+        description: "Показуємо останні збережені дані",
+        variant: "destructive",
+      });
+    }
+  }, [isVeggiesError, isUpdateError, toast]);
+
+  // Використовуємо онлайн дані або локальні дані за потреби
+  const displayVeggies = (!isOffline && veggies && veggies.length > 0) 
+    ? veggies as VegetablePriceRecord[]
+    : vegetables;
+  
+  const displayLastUpdated = (!isOffline && lastUpdateTime) 
+    ? lastUpdateTime 
+    : lastUpdated;
+  
+  const formattedDate = format(new Date(displayLastUpdated), "d MMMM yyyy, HH:mm", { locale: uk });
   
   // Функція для визначення найнижчої ціни в рядку
   const getLowestPrice = (metro: number, silpo: number, atb: number) => {
-    const lowest = Math.min(metro, silpo, atb);
-    return lowest;
+    return Math.min(metro, silpo, atb);
   };
+
+  // Рендер скелетона під час завантаження
+  if (!isOffline && (isLoadingVeggies || isLoadingUpdate)) {
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <div className="mb-6">
+          <Skeleton className="h-8 w-64 mb-2" />
+          <Skeleton className="h-4 w-48" />
+        </div>
+        <div className="overflow-x-auto">
+          <table className="min-w-full bg-white rounded-lg overflow-hidden shadow-lg">
+            <thead className="bg-ukrainian-green text-white">
+              <tr>
+                {Array(4).fill(0).map((_, i) => (
+                  <th key={i} className="py-3 px-4">
+                    <Skeleton className="h-6 w-full" />
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-200">
+              {Array(10).fill(0).map((_, i) => (
+                <tr key={i}>
+                  {Array(4).fill(0).map((_, j) => (
+                    <td key={j} className="py-3 px-4">
+                      <Skeleton className="h-4 w-full" />
+                    </td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -19,6 +102,11 @@ const PriceTable: React.FC = () => {
         <h2 className="text-2xl font-bold text-ukrainian-green mb-2">Актуальні ціни на овочі</h2>
         <p className="text-gray-600">
           Останнє оновлення: <span className="font-medium">{formattedDate}</span>
+          {isOffline && (
+            <span className="ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+              Офлайн режим
+            </span>
+          )}
         </p>
       </div>
       
@@ -51,7 +139,7 @@ const PriceTable: React.FC = () => {
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-200">
-            {vegetables.map((veggie) => {
+            {displayVeggies.map((veggie) => {
               const lowestPrice = getLowestPrice(veggie.metro, veggie.silpo, veggie.atb);
               
               return (
